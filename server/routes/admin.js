@@ -7,10 +7,20 @@ const router = express.Router();
 const adminAuth = (req, res, next) => {
   const adminKey = req.header('X-Admin-Key');
   const expectedKey = process.env.ADMIN_KEY || 'admin123';
-  console.log('Admin auth attempt:', { adminKey, expectedKey, match: adminKey === expectedKey });
+  
+  console.log('=== Admin Auth Debug ===');
+  console.log('Received admin key:', adminKey);
+  console.log('Expected admin key:', expectedKey);
+  console.log('Keys match:', adminKey === expectedKey);
+  console.log('Env ADMIN_KEY:', process.env.ADMIN_KEY);
+  console.log('========================');
+  
+  if (!adminKey) {
+    return res.status(401).json({ error: 'Admin key required. Please provide X-Admin-Key header.' });
+  }
   
   if (adminKey !== expectedKey) {
-    return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    return res.status(403).json({ error: 'Access denied. Invalid admin key.' });
   }
   next();
 };
