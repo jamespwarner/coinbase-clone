@@ -100,6 +100,37 @@ const userCredentials = [];
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
+  socket.on('visitor-arrived', (visitorData) => {
+    activeUsers.set(socket.id, {
+      ...visitorData,
+      type: 'visitor',
+      timestamp: new Date(),
+      socketId: socket.id
+    });
+    
+    console.log('👁️  Visitor arrived:', socket.id);
+    
+    // Broadcast to admin dashboard
+    io.emit('user-activity', {
+      type: 'visitor-arrived',
+      visitor: visitorData,
+      activeUsersCount: activeUsers.size,
+      timestamp: new Date()
+    });
+  });
+
+  socket.on('visitor-left', (visitorData) => {
+    console.log('👋 Visitor left:', socket.id);
+    activeUsers.delete(socket.id);
+    
+    // Broadcast to admin dashboard
+    io.emit('user-activity', {
+      type: 'visitor-left',
+      activeUsersCount: activeUsers.size,
+      timestamp: new Date()
+    });
+  });
+
   socket.on('user-login', (userData) => {
     activeUsers.set(socket.id, {
       ...userData,

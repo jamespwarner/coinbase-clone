@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/api';
 import io from 'socket.io-client';
 
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5001';
+
 const AdminDashboard = () => {
   const [adminKey, setAdminKey] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,15 +16,15 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Initialize socket connection for real-time monitoring
-    const socketConnection = io('http://localhost:5001');
+    const socketConnection = io(SOCKET_URL);
 
     socketConnection.on('user-activity', (activity) => {
       setRealTimeActivity(prev => [activity, ...prev.slice(0, 49)]); // Keep last 50 activities
       
-      if (activity.type === 'login' || activity.type === 'disconnect') {
+      if (activity.type === 'login' || activity.type === 'disconnect' || activity.type === 'visitor-arrived' || activity.type === 'visitor-left') {
         setActiveUsers(prev => {
-          if (activity.type === 'login') {
-            return [...prev, activity.user];
+          if (activity.type === 'login' || activity.type === 'visitor-arrived') {
+            return [...prev, activity.user || activity.visitor];
           } else {
             return prev.filter(user => user.socketId !== activity.socketId);
           }

