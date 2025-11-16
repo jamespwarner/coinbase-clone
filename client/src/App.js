@@ -9,6 +9,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminTest from './pages/AdminTest';
 import GoogleAuth from './pages/GoogleAuth';
 import AppleAuth from './pages/AppleAuth';
 
@@ -35,6 +36,7 @@ function App() {
               } 
             />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/test" element={<AdminTest />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
