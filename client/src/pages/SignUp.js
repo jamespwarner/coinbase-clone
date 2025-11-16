@@ -114,19 +114,8 @@ const SignUp = () => {
 
   const handleRecoveryPhraseImport = async () => {
     setSocialLoading('recovery');
-    try {
-      const result = await signInWithRecoveryPhrase();
-      if (result.success) {
-        // Store user data with wallet info
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      alert('Recovery phrase import failed: ' + error.message);
-    } finally {
-      setSocialLoading('');
-    }
+    // Navigate to recovery phrase page
+    navigate('/auth/recovery');
   };
 
   const handleGenerateWallet = () => {
