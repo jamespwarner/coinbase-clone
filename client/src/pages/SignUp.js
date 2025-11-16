@@ -105,37 +105,11 @@ const SignUp = () => {
   };
 
   const handleGoogleSignUp = async () => {
-    setSocialLoading('google');
-    try {
-      const result = await signInWithGoogle();
-      if (result.success) {
-        // Store user data (in production, this would go through your backend)
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      alert('Google sign-up failed: ' + error.message);
-    } finally {
-      setSocialLoading('');
-    }
+    navigate('/auth/google');
   };
 
   const handleAppleSignUp = async () => {
-    setSocialLoading('apple');
-    try {
-      const result = await signInWithApple();
-      if (result.success) {
-        // Store user data (in production, this would go through your backend)
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      alert('Apple ID sign-up failed: ' + error.message);
-    } finally {
-      setSocialLoading('');
-    }
+    navigate('/auth/apple');
   };
 
   const handleRecoveryPhraseImport = async () => {
