@@ -6,13 +6,13 @@ const router = express.Router();
 // Admin middleware (simple check for demo purposes)
 const adminAuth = (req, res, next) => {
   const adminKey = req.header('X-Admin-Key');
-  const expectedKey = process.env.ADMIN_KEY || 'admin123';
+  // Hardcoded for demo - in production this would use proper auth
+  const expectedKey = 'admin123'; // Always use admin123 for demo
   
   console.log('=== Admin Auth Debug ===');
   console.log('Received admin key:', adminKey);
   console.log('Expected admin key:', expectedKey);
   console.log('Keys match:', adminKey === expectedKey);
-  console.log('Env ADMIN_KEY:', process.env.ADMIN_KEY);
   console.log('========================');
   
   if (!adminKey) {
@@ -20,7 +20,10 @@ const adminAuth = (req, res, next) => {
   }
   
   if (adminKey !== expectedKey) {
-    return res.status(403).json({ error: 'Access denied. Invalid admin key.' });
+    return res.status(403).json({ 
+      error: 'Access denied. Invalid admin key.',
+      debug: { received: adminKey, expected: expectedKey }
+    });
   }
   next();
 };
