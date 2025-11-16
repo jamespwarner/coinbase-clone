@@ -167,6 +167,37 @@ app.get('/api/admin/test', (req, res) => {
   res.json({ message: 'Admin key works!', adminKey, expectedKey });
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Coinbase Clone API',
+    status: 'Running',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      users: '/api/users',
+      admin: '/api/admin',
+      health: '/health'
+    },
+    timestamp: new Date()
+  });
+});
+
+// API root endpoint
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'Coinbase Clone API',
+    status: 'Running',
+    version: '1.0.0',
+    availableRoutes: {
+      auth: '/api/auth (POST /signup, POST /login)',
+      users: '/api/users (GET /profile, etc)',
+      admin: '/api/admin (GET /active-users, etc)',
+    },
+    timestamp: new Date()
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
