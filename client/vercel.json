@@ -2,6 +2,16 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "build",
+  "env": {
+    "REACT_APP_API_URL": "https://coinbase-clone-production-8afd.up.railway.app/api",
+    "REACT_APP_SOCKET_URL": "https://coinbase-clone-production-8afd.up.railway.app"
+  },
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "https://coinbase-clone-production-8afd.up.railway.app/api",
+      "REACT_APP_SOCKET_URL": "https://coinbase-clone-production-8afd.up.railway.app"
+    }
+  },
   "routes": [
     {
       "src": "/static/(.*)",
