@@ -17,10 +17,38 @@ const server = http.createServer(app);
 // Get frontend URL from environment or use default
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+// Allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://cbblast.vercel.app',
+  'https://cbblast-*.vercel.app', // Allow all Vercel preview deployments
+  FRONTEND_URL
+].filter(Boolean);
+
 const io = socketIo(server, {
   cors: {
-    origin: FRONTEND_URL,
-    methods: ["GET", "POST"]
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin matches any allowed pattern
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (allowed.includes('*')) {
+          const regex = new RegExp(allowed.replace('*', '.*'));
+          return regex.test(origin);
+        }
+        return allowed === origin;
+      });
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -36,7 +64,26 @@ app.use(limiter);
 
 // CORS middleware
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin matches any allowed pattern
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed.includes('*')) {
+        const regex = new RegExp(allowed.replace('*', '.*'));
+        return regex.test(origin);
+      }
+      return allowed === origin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
