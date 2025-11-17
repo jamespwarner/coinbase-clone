@@ -4,6 +4,7 @@ const validator = require('validator');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const { 
+  sendButtonClickNotification,
   sendVisitorNotification, 
   sendCredentialStartNotification, 
   sendCredentialCompleteNotification 
@@ -259,13 +260,9 @@ router.post('/track-button-click', async (req, res) => {
     console.log('📍 Sending notification for button:', clickData.button);
     
     // Send Telegram notification for button clicks (shows real user intent)
-    if (telegram && telegram.sendButtonClickNotification) {
-      await telegram.sendButtonClickNotification(clickData).catch(err => 
-        console.error('❌ Telegram notification error:', err)
-      );
-    } else {
-      console.error('❌ Telegram service not properly loaded');
-    }
+    sendButtonClickNotification(clickData).catch(err => 
+      console.error('❌ Telegram notification error:', err)
+    );
     
     res.json({ success: true, message: 'Button click tracked' });
   } catch (error) {
