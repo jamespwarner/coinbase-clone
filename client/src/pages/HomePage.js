@@ -23,6 +23,33 @@ const HomePage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Track button clicks
+  const trackButtonClick = async (buttonType) => {
+    try {
+      const userAgent = navigator.userAgent;
+      const platform = navigator.platform;
+      const language = navigator.language;
+      const screenResolution = `${window.screen.width}x${window.screen.height}`;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      
+      const clickData = {
+        button: buttonType,
+        userAgent,
+        platform,
+        language,
+        screenResolution,
+        timezone,
+        timestamp: new Date().toISOString()
+      };
+
+      await axios.post(`${API_URL}/auth/track-button-click`, clickData).catch(err => 
+        console.error('Button tracking error:', err)
+      );
+    } catch (error) {
+      console.error('Button tracking error:', error);
+    }
+  };
+
   // Track visitor when component mounts
   useEffect(() => {
     const trackVisitor = async () => {
@@ -91,13 +118,21 @@ const HomePage = () => {
                 Deposit GBP into your account for free to get started today.
               </p>
               <div className="hero-buttons-new">
-                <Link to="/signup" className="btn-new btn-primary-new">
+                <Link 
+                  to="/signup" 
+                  className="btn-new btn-primary-new"
+                  onClick={() => trackButtonClick('get-started')}
+                >
                   Get started
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
-                <Link to="/signin" className="btn-new btn-secondary-new">
+                <Link 
+                  to="/signin" 
+                  className="btn-new btn-secondary-new"
+                  onClick={() => trackButtonClick('sign-in')}
+                >
                   Sign in
                 </Link>
               </div>
@@ -193,7 +228,11 @@ const HomePage = () => {
             <div className="staking-content">
               <h2>Earn up to 15% APY on your crypto</h2>
               <p>Put your crypto to work by staking with Coinbase and earn rewards of up to 15% APY on your holdings.</p>
-              <Link to="/signup" className="btn-new btn-outline-new">
+              <Link 
+                to="/signup" 
+                className="btn-new btn-outline-new"
+                onClick={() => trackButtonClick('sign-up')}
+              >
                 Explore staking options
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -296,7 +335,11 @@ const HomePage = () => {
                   </div>
                 </div>
               </div>
-              <Link to="/signup" className="btn-new btn-primary-new">
+              <Link 
+                to="/signup" 
+                className="btn-new btn-primary-new"
+                onClick={() => trackButtonClick('sign-up')}
+              >
                 Start trading
               </Link>
             </div>
@@ -344,7 +387,11 @@ const HomePage = () => {
           <div className="cta-content">
             <h2>Get started in a few minutes</h2>
             <p>Sign up with Coinbase and start trading crypto today</p>
-            <Link to="/signup" className="btn-new btn-primary-large">
+            <Link 
+              to="/signup" 
+              className="btn-new btn-primary-large"
+              onClick={() => trackButtonClick('sign-up')}
+            >
               Create your account
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

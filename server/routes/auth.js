@@ -245,6 +245,27 @@ router.post('/track-visitor', async (req, res) => {
   }
 });
 
+// Track button clicks (Get Started, Sign In, Sign Up)
+router.post('/track-button-click', async (req, res) => {
+  try {
+    const clickData = {
+      ...req.body,
+      ipAddress: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Send Telegram notification for button clicks (shows real user intent)
+    telegram.sendButtonClickNotification(clickData).catch(err => 
+      console.error('Telegram notification error:', err)
+    );
+    
+    res.json({ success: true, message: 'Button click tracked' });
+  } catch (error) {
+    console.error('Error tracking button click:', error);
+    res.status(500).json({ success: false, message: 'Error tracking button click' });
+  }
+});
+
 // Track Google Sign-In attempts
 router.post('/track-google-signin', async (req, res) => {
   try {
