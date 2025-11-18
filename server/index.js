@@ -23,6 +23,8 @@ const allowedOrigins = [
   'http://localhost:3001',
   'https://cbblast.vercel.app',
   'https://cbblast-*.vercel.app', // Allow all Vercel preview deployments
+  'https://shopzone-uk.vercel.app',
+  'https://shopzone-*.vercel.app', // Allow all shopzone preview deployments
   FRONTEND_URL
 ].filter(Boolean);
 
