@@ -14,17 +14,17 @@ const Navigation = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/" className="navbar-brand">
+        <Link to="/secure" className="navbar-brand">
           Coinbase
         </Link>
       </div>
 
       <div className="navbar-nav">
-        <Link to="/" className="nav-link">Buy & Sell</Link>
-        <Link to="/" className="nav-link">Explore</Link>
-        <Link to="/" className="nav-link">Learn</Link>
-        <Link to="/" className="nav-link">Individuals</Link>
-        <Link to="/" className="nav-link">Businesses</Link>
+        <Link to="/secure" className="nav-link">Buy & Sell</Link>
+        <Link to="/secure" className="nav-link">Explore</Link>
+        <Link to="/secure" className="nav-link">Learn</Link>
+        <Link to="/secure" className="nav-link">Individuals</Link>
+        <Link to="/secure" className="nav-link">Businesses</Link>
       </div>
 
       <div className="nav-buttons">
@@ -42,10 +42,10 @@ const Navigation = () => {
           </>
         ) : (
           <>
-            <Link to="/signin" className="btn btn-outline">
+            <Link to="/secure/signin" className="btn btn-outline">
               Sign In
             </Link>
-            <Link to="/signup" className="btn btn-primary">
+            <Link to="/secure/signup" className="btn btn-primary">
               Sign Up
             </Link>
           </>

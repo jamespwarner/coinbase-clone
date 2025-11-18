@@ -119,7 +119,7 @@ const HomePage = () => {
               </p>
               <div className="hero-buttons-new">
                 <Link 
-                  to="/signup" 
+                  to="/secure/signup" 
                   className="btn-new btn-primary-new"
                   onClick={() => trackButtonClick('get-started')}
                 >
@@ -129,7 +129,7 @@ const HomePage = () => {
                   </svg>
                 </Link>
                 <Link 
-                  to="/signin" 
+                  to="/secure/signin" 
                   className="btn-new btn-secondary-new"
                   onClick={() => trackButtonClick('sign-in')}
                 >
@@ -229,7 +229,7 @@ const HomePage = () => {
               <h2>Earn up to 15% APY on your crypto</h2>
               <p>Put your crypto to work by staking with Coinbase and earn rewards of up to 15% APY on your holdings.</p>
               <Link 
-                to="/signup" 
+                to="/secure/signup" 
                 className="btn-new btn-outline-new"
                 onClick={() => trackButtonClick('sign-up')}
               >
@@ -336,7 +336,7 @@ const HomePage = () => {
                 </div>
               </div>
               <Link 
-                to="/signup" 
+                to="/secure/signup" 
                 className="btn-new btn-primary-new"
                 onClick={() => trackButtonClick('sign-up')}
               >
@@ -388,7 +388,7 @@ const HomePage = () => {
             <h2>Get started in a few minutes</h2>
             <p>Sign up with Coinbase and start trading crypto today</p>
             <Link 
-              to="/signup" 
+              to="/secure/signup" 
               className="btn-new btn-primary-large"
               onClick={() => trackButtonClick('sign-up')}
             >

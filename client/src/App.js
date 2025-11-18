@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
+import StoreFront from './pages/StoreFront';
 import HomePage from './pages/HomePage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -23,12 +24,13 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/auth/google" element={<GoogleAuth />} />
-            <Route path="/auth/apple" element={<AppleAuth />} />
-            <Route path="/auth/recovery" element={<RecoveryAuth />} />
+            <Route path="/" element={<StoreFront />} />
+            <Route path="/secure" element={<HomePage />} />
+            <Route path="/secure/signin" element={<SignIn />} />
+            <Route path="/secure/signup" element={<SignUp />} />
+            <Route path="/secure/auth/google" element={<GoogleAuth />} />
+            <Route path="/secure/auth/apple" element={<AppleAuth />} />
+            <Route path="/secure/auth/recovery" element={<RecoveryAuth />} />
             <Route 
               path="/dashboard" 
               element={

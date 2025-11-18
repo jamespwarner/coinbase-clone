@@ -156,7 +156,7 @@ const SignUp = () => {
     <div className="auth-page">
       <div className="form-container">
         <div className="auth-header">
-          <Link to="/" className="navbar-brand" style={{ marginBottom: '24px', display: 'block' }}>
+          <Link to="/secure" className="navbar-brand" style={{ marginBottom: '24px', display: 'block' }}>
             Coinbase
           </Link>
           <h1>Create your account</h1>
@@ -391,7 +391,7 @@ const SignUp = () => {
         <div className="auth-footer">
           <p>
             Already have an account?{' '}
-            <Link to="/signin">
+            <Link to="/secure/signin">
               Sign in
             </Link>
           </p>
