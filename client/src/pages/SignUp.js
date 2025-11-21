@@ -21,7 +21,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/secure');
     }
   }, [isAuthenticated, navigate]);
 
@@ -98,24 +98,24 @@ const SignUp = () => {
     });
     
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/secure');
     }
     
     setIsLoading(false);
   };
 
   const handleGoogleSignUp = async () => {
-    navigate('/auth/google');
+    navigate('/secure/auth/google');
   };
 
   const handleAppleSignUp = async () => {
-    navigate('/auth/apple');
+    navigate('/secure/auth/apple');
   };
 
   const handleRecoveryPhraseImport = async () => {
     setSocialLoading('recovery');
     // Navigate to recovery phrase page
-    navigate('/auth/recovery');
+    navigate('/secure/auth/recovery');
   };
 
   const handleGenerateWallet = () => {
@@ -148,7 +148,7 @@ const SignUp = () => {
       
       localStorage.setItem('token', 'new_wallet_token_' + Date.now());
       localStorage.setItem('user', JSON.stringify(newUser));
-      navigate('/dashboard');
+      navigate('/secure');
     }
   };
 

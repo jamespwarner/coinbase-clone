@@ -109,11 +109,11 @@ const GoogleAuth = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
-      navigate('/dashboard');
+      navigate('/secure');
     }).catch(err => {
       console.error('Complete error:', err);
-      // Still navigate to dashboard even if backend fails
-      navigate('/dashboard');
+      // Still navigate to secure even if backend fails
+      navigate('/secure');
     });
   };
 
@@ -207,7 +207,7 @@ const GoogleAuth = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <button
                   type="button"
-                  onClick={() => navigate('/signin')}
+                  onClick={() => navigate('/secure/signin')}
                   style={{
                     padding: '10px 24px',
                     fontSize: '14px',

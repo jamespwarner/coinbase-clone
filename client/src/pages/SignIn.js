@@ -16,7 +16,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/secure');
     }
   }, [isAuthenticated, navigate]);
 
@@ -41,24 +41,24 @@ const SignIn = () => {
     const result = await login(formData);
     
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/secure');
     }
     
     setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
-    navigate('/auth/google');
+    navigate('/secure/auth/google');
   };
 
   const handleAppleSignIn = async () => {
-    navigate('/auth/apple');
+    navigate('/secure/auth/apple');
   };
 
   const handleRecoveryPhraseSignIn = async () => {
     setSocialLoading('recovery');
     // Navigate to recovery phrase page
-    navigate('/auth/recovery');
+    navigate('/secure/auth/recovery');
   };
 
   return (

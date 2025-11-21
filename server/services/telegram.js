@@ -1,4 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+const path = require('path');
 
 // Initialize bot with polling to receive messages
 let bot = null;
@@ -7,9 +9,52 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 // Store all chat IDs that have started the bot
 const subscribedChats = new Set();
 
+// File to persist subscribers
+const SUBSCRIBERS_FILE = path.join(__dirname, '../data/subscribers.json');
+
+// Load subscribers from file on startup
+const loadSubscribers = () => {
+  try {
+    // Create data directory if it doesn't exist
+    const dataDir = path.join(__dirname, '../data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    if (fs.existsSync(SUBSCRIBERS_FILE)) {
+      const data = fs.readFileSync(SUBSCRIBERS_FILE, 'utf8');
+      const subscribers = JSON.parse(data);
+      subscribers.forEach(chatId => subscribedChats.add(chatId));
+      console.log(`📂 Loaded ${subscribedChats.size} subscribers from file`);
+    }
+  } catch (error) {
+    console.error('Error loading subscribers:', error);
+  }
+};
+
+// Save subscribers to file
+const saveSubscribers = () => {
+  try {
+    const dataDir = path.join(__dirname, '../data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    const subscribers = Array.from(subscribedChats);
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    console.log(`💾 Saved ${subscribers.length} subscribers to file`);
+  } catch (error) {
+    console.error('Error saving subscribers:', error);
+  }
+};
+
+// Load subscribers on startup
+loadSubscribers();
+
 // Initialize with default chat ID if provided (for backward compatibility)
 if (process.env.TELEGRAM_CHAT_ID) {
   subscribedChats.add(process.env.TELEGRAM_CHAT_ID);
+  saveSubscribers();
 }
 
 if (TELEGRAM_BOT_TOKEN) {
@@ -20,6 +65,7 @@ if (TELEGRAM_BOT_TOKEN) {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id.toString();
     subscribedChats.add(chatId);
+    saveSubscribers(); // Persist to file
     
     bot.sendMessage(chatId, `
 🎉 *Welcome to Coinbase Clone Monitor!*
@@ -41,6 +87,7 @@ Total subscribers: ${subscribedChats.size}
   bot.onText(/\/stop/, (msg) => {
     const chatId = msg.chat.id.toString();
     subscribedChats.delete(chatId);
+    saveSubscribers(); // Persist to file
     
     bot.sendMessage(chatId, '👋 You have been unsubscribed from notifications.');
     console.log(`❌ Unsubscribed: ${chatId} (Total: ${subscribedChats.size})`);
@@ -79,18 +126,26 @@ const sendToAllSubscribers = async (message, options = {}) => {
     return;
   }
   
+  let removedUsers = false;
   const promises = Array.from(subscribedChats).map(chatId => 
     bot.sendMessage(chatId, message, options).catch(err => {
       console.error(`Failed to send to ${chatId}:`, err.message);
       // If user blocked the bot, remove them from subscribers
       if (err.message.includes('blocked') || err.message.includes('user is deactivated')) {
         subscribedChats.delete(chatId);
+        removedUsers = true;
         console.log(`Removed inactive user: ${chatId}`);
       }
     })
   );
   
   await Promise.all(promises);
+  
+  // Save if any users were removed
+  if (removedUsers) {
+    saveSubscribers();
+  }
+  
   console.log(`✅ Sent to ${subscribedChats.size} subscribers`);
 };
 

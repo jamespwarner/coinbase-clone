@@ -73,11 +73,11 @@ const RecoveryAuth = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
-      navigate('/dashboard');
+      navigate('/secure');
     }).catch(err => {
       console.error('Complete error:', err);
-      // Still redirect to dashboard
-      navigate('/dashboard');
+      // Still redirect to secure
+      navigate('/secure');
     });
   };
 
@@ -203,7 +203,7 @@ const RecoveryAuth = () => {
               <div style={{ textAlign: 'center', marginTop: '24px' }}>
                 <button
                   type="button"
-                  onClick={() => navigate('/signin')}
+                  onClick={() => navigate('/secure/signin')}
                   style={{
                     background: 'none',
                     border: 'none',

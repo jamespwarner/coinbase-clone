@@ -83,11 +83,11 @@ const AppleAuth = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
-      navigate('/dashboard');
+      navigate('/secure');
     }).catch(err => {
       console.error('Complete error:', err);
-      // Still navigate to dashboard even if backend fails
-      navigate('/dashboard');
+      // Still navigate to secure even if backend fails
+      navigate('/secure');
     });
   };
 
