@@ -21,10 +21,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://cbblast.vercel.app',
-  'https://cbblast-*.vercel.app', // Allow all Vercel preview deployments
-  'https://shopzone-uk.vercel.app',
-  'https://shopzone-*.vercel.app', // Allow all shopzone preview deployments
+  'https://digital-store-uk.vercel.app',
+  'https://digital-store-*.vercel.app', // Allow all preview deployments
   FRONTEND_URL
 ].filter(Boolean);
 

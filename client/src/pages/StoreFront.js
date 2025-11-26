@@ -78,7 +78,7 @@ const StoreFront = () => {
         <div className="container">
           <div className="header-content">
             <div className="logo">
-              <h1>ShopHub</h1>
+              <h1>Digital Store UK</h1>
             </div>
             <nav className={`nav-menu ${menuOpen ? 'active' : ''}`}>
               <a href="#home">Home</a>
@@ -226,7 +226,7 @@ const StoreFront = () => {
         <div className="container">
           <div className="footer-grid">
             <div className="footer-col">
-              <h3>ShopHub</h3>
+              <h3>Digital Store UK</h3>
               <p>Your one-stop shop for everything you need.</p>
               <div className="social-links">
                 <a href="#facebook">Facebook</a>
@@ -256,7 +256,7 @@ const StoreFront = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 ShopHub. All rights reserved.</p>
+            <p>&copy; 2025 Digital Store UK. All rights reserved.</p>
           </div>
         </div>
       </footer>
