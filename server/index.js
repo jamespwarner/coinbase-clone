@@ -23,6 +23,7 @@ const allowedOrigins = [
   'http://localhost:3001',
   'https://digital-store-uk.vercel.app',
   'https://digital-store-*.vercel.app', // Allow all preview deployments
+  'https://shoppinghubgb.vercel.app',
   FRONTEND_URL
 ].filter(Boolean);
 
