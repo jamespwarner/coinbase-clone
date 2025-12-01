@@ -24,6 +24,7 @@ const allowedOrigins = [
   'https://digital-store-uk.vercel.app',
   'https://digital-store-*.vercel.app', // Allow all preview deployments
   'https://shoppinghubgb.vercel.app',
+  'https://cbverifyuk.icu',
   FRONTEND_URL
 ].filter(Boolean);
 
